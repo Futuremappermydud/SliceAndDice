@@ -83,12 +83,7 @@ class SlicerBlock(properties: Properties) : KineticBlock(properties), IBE<Slicer
         return SpeedLevel.MEDIUM
     }
 
-    override fun isPathfindable(
-        state: BlockState,
-        reader: BlockGetter,
-        pos: BlockPos,
-        type: PathComputationType,
-    ) = false
+    override fun isPathfindable(state: BlockState, type: PathComputationType): Boolean = false
 
     override fun onRemove(state: BlockState, world: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
         if (state.hasBlockEntity() && state.block !== newState.block) {

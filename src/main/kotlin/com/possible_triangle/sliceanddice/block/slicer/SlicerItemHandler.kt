@@ -2,7 +2,7 @@ package com.possible_triangle.sliceanddice.block.slicer
 
 import com.possible_triangle.sliceanddice.Content
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.items.IItemHandlerModifiable
+import net.neoforged.neoforge.items.IItemHandlerModifiable
 
 class SlicerItemHandler(private val tile: SlicerTile) : IItemHandlerModifiable {
 

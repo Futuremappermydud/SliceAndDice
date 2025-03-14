@@ -14,12 +14,11 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.Container
-import net.minecraft.world.item.crafting.Ingredient
-import net.minecraft.world.item.crafting.RecipeSerializer
-import net.minecraft.world.item.crafting.RecipeType
+import net.minecraft.world.item.crafting.*
 import net.minecraft.world.level.ItemLike
 import net.minecraft.world.level.Level
 import java.util.function.Supplier
+import javax.annotation.Nonnull
 
 data class CuttingProcessingRecipe(
     val params: ProcessingRecipeParams,
@@ -29,14 +28,14 @@ data class CuttingProcessingRecipe(
     BasinRecipe(CuttingProcessingRecipe, params), IAssemblyRecipe {
 
     companion object : IRecipeTypeInfo {
-        override fun getId() = ResourceLocation(SliceAndDice.MOD_ID, "cutting")
+        override fun getId() = ResourceLocation.fromNamespaceAndPath(SliceAndDice.MOD_ID, "cutting")
 
         override fun <T : RecipeSerializer<*>?> getSerializer() = Content.CUTTING_SERIALIZER.get() as T
 
-        override fun <T : RecipeType<*>?> getType() = Content.CUTTING_RECIPE_TYPE.get() as T
+        override fun <I : RecipeInput, R : Recipe<I>> getType(): RecipeType<R> = Content.CUTTING_RECIPE_TYPE.unwrap() as RecipeType<R>
     }
 
-    override fun matches(inv: Container, world: Level) = true
+    override fun matches(input: RecipeInput, @Nonnull worldIn: Level) = true
 
     override fun getDescriptionForAssembly(): Component {
         return Component.translatable("${SliceAndDice.MOD_ID}.recipe.assembly.slicer")
@@ -64,18 +63,17 @@ data class CuttingProcessingRecipe(
             id: ResourceLocation,
             json: JsonObject
         ): CuttingProcessingRecipe {
-            val tool = Ingredient.fromJson(json.getAsJsonObject("tool"))
+            val tool = Ingredient.fromJson(json.get("tool"))
             return processing.fromJson(id, json).copy(tool = tool)
         }
 
         override fun fromNetwork(
             id: ResourceLocation,
             buffer: FriendlyByteBuf
-        ): CuttingProcessingRecipe? {
-            return processing.fromNetwork(id, buffer)?.let {
-                val tool = Ingredient.fromNetwork(buffer)
-                it.copy(tool = tool)
-            }
+        ): CuttingProcessingRecipe {
+            val recipe = processing.fromNetwork(id, buffer)
+            val tool = Ingredient.fromNetwork(buffer)
+            return recipe.copy(tool = tool)
         }
 
         override fun toNetwork(

@@ -18,7 +18,7 @@ import vectorwing.farmersdelight.integration.jei.FDRecipeTypes
 import java.util.function.BiConsumer
 
 private fun CuttingBoardRecipe.toBasin(): CuttingProcessingRecipe {
-    val basinId = ResourceLocation(SliceAndDice.MOD_ID, "${id.namespace}_${id.path}")
+    val basinId = ResourceLocation.fromNamespaceAndPath(SliceAndDice.MOD_ID, "${id.namespace}_${id.path}")
     val builder = ProcessingRecipeBuilder(::CuttingProcessingRecipe, basinId)
     ingredients.forEach { builder.require(it) }
     rollableResults.forEach { builder.output(it.chance, it.stack) }
@@ -62,7 +62,7 @@ class FarmersDelightCompat private constructor() : IRecipeInjector {
         SliceAndDice.LOGGER.debug("Found {} cutting recipes", cuttingRecipes.size)
 
         cuttingRecipes.forEach { (originalID, recipe) ->
-            val id = ResourceLocation(SliceAndDice.MOD_ID, "cutting/${originalID.namespace}/${originalID.path}")
+            val id = ResourceLocation.fromNamespaceAndPath(SliceAndDice.MOD_ID, "cutting/${originalID.namespace}/${originalID.path}")
             add.accept(id, recipe.toBasin())
         }
     }
@@ -82,7 +82,7 @@ class FarmersDelightCompat private constructor() : IRecipeInjector {
         SliceAndDice.LOGGER.debug("Found {} cooking recipes", cookingRecipes.size)
 
         return cookingRecipes.forEach { (originalID, recipe) ->
-            val id = ResourceLocation(SliceAndDice.MOD_ID, "cooking/${originalID.namespace}/${originalID.path}")
+            val id = ResourceLocation.fromNamespaceAndPath(SliceAndDice.MOD_ID, "cooking/${originalID.namespace}/${originalID.path}")
             val builder = ProcessingRecipeBuilder(::LazyMixingRecipe, id)
             builder.duration(recipe.cookTime)
             builder.requiresHeat(HeatCondition.HEATED)

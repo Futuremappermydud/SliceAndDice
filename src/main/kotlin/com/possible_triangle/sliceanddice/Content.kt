@@ -30,6 +30,7 @@ import com.tterrag.registrate.util.nullness.NonNullFunction
 import dev.engine_room.flywheel.lib.visualization.SimpleBlockEntityVisualizer
 import net.createmod.ponder.foundation.PonderIndex
 import net.minecraft.client.renderer.RenderType
+import net.minecraft.core.Holder
 import net.minecraft.core.registries.Registries
 import net.minecraft.data.recipes.RecipeCategory
 import net.minecraft.data.recipes.ShapedRecipeBuilder
@@ -40,16 +41,16 @@ import net.minecraft.world.item.crafting.Recipe
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockBehaviour
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.data.event.GatherDataEvent
-import net.minecraftforge.eventbus.api.IEventBus
-import net.minecraftforge.fluids.ForgeFlowingFluid
-import net.minecraftforge.fml.DistExecutor
-import net.minecraftforge.fml.DistExecutor.SafeCallable
-import net.minecraftforge.fml.config.ModConfig
-import net.minecraftforge.registries.DeferredRegister
-import net.minecraftforge.registries.ForgeRegistries
-import net.minecraftforge.registries.RegistryObject
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.data.event.GatherDataEvent
+import net.neoforged.eventbus.api.IEventBus
+import net.neoforged.neoforge.fluids.BaseFlowingFluid
+import net.neoforged.fml.DistExecutor
+import net.neoforged.fml.DistExecutor.SafeCallable
+import net.neoforged.fml.config.ModConfig
+import net.neoforged.neoforge.registries.DeferredRegister
+import net.neoforged.neoforge.registries.NeoForgeRegistries
+import net.neoforged.neoforge.registries.RegistryObject
 import thedarkcolour.kotlinforforge.forge.LOADING_CONTEXT
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import java.util.function.Supplier
@@ -62,7 +63,7 @@ object Content {
 
     private val REGISTRATE = CreateRegistrate.create(MOD_ID)
 
-    val RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MOD_ID)
+    val RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MOD_ID)
     val RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MOD_ID)
 
     val ALLOWED_TOOLS = TagKey.create(Registries.ITEM, modLoc("allowed_tools"))
@@ -87,18 +88,16 @@ object Content {
         .visual { SimpleBlockEntityVisualizer.Factory(::SlicerVisual) }
         .renderer { NonNullFunction { SlicerRenderer(it) } }.validBlock(SLICER_BLOCK).register()
 
-    private fun <T : Recipe<*>> createRecipeType(id: ResourceLocation): RegistryObject<RecipeType<T>> {
+    private fun <T : Recipe<*>> createRecipeType(id: ResourceLocation): Holder<RecipeType<T>> {
         val type = object : RecipeType<T> {
             override fun toString() = id.toString()
         }
-        return RECIPE_TYPES.register(id.path) { type }
+        return RECIPE_TYPES.register(id.path, type)
     }
 
     val CUTTING_RECIPE_TYPE = createRecipeType<CuttingProcessingRecipe>(CuttingProcessingRecipe.id)
 
-    val CUTTING_SERIALIZER = RECIPE_SERIALIZERS.register(CuttingProcessingRecipe.id.path) {
-        CuttingProcessingRecipe.Serializer
-    }
+    val CUTTING_SERIALIZER = RECIPE_SERIALIZERS.register(CuttingProcessingRecipe.id.path, CuttingProcessingRecipe.Serializer::new)
 
     val WET_AIR = REGISTRATE.block<WetAir>("wet_air", ::WetAir).initialProperties { Blocks.CAVE_AIR }
         .properties { it.randomTicks() }.blockstate { c, p ->
@@ -114,10 +113,12 @@ object Content {
         .transform(ModelGen.customItemModel("_"))
         .recipe { c, p ->
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, c.entry, 3).pattern("SPS").pattern("SBS")
-                .define('S', AllTags.forgeItemTag("plates/copper")).define('B', Blocks.IRON_BARS)
+                .define('S', AllTags.commonItemTag("plates/copper")).define('B', Blocks.IRON_BARS)
                 .define('P', AllBlocks.FLUID_PIPE.get()).unlockedBy("has_pipe", has(AllBlocks.FLUID_PIPE.get())).save(p)
         }
         .register()
+
+
 
     val SPRINKLER_TILE =
         REGISTRATE.blockEntity("sprinkler", BlockEntityFactory(::SprinklerTile)).validBlock(SPRINKLER_BLOCK).register()
@@ -133,7 +134,7 @@ object Content {
         REGISTRATE.fluid("fertilizer", modLoc("block/fluid/fertilizer_still"), modLoc("block/fluid/fertilizer_flowing"))
             .lang("Liquid Fertilizer")
             .tag(FERTILIZERS)
-            .source { ForgeFlowingFluid.Source(it) }
+            .source { BaseFlowingFluid.Source(it) }
             .bucket()
             .tab(AllCreativeModeTabs.BASE_CREATIVE_TAB.key!!)
             .model(AssetLookup.existingItemModel())

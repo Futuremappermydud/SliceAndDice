@@ -1,0 +1,93 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.78'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.10'
+}
+
+neoForge {
+    version = "21.1.133"
+}
+
+repositories {
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+    }
+    maven {
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
+    maven {
+        url = "https://maven.blamejared.com/"
+        content {
+            includeGroup "mezz.jei"
+        }
+    }
+    maven {
+        url = "https://mvn.devos.one/snapshots"
+        content {
+            includeGroup "com.tterrag.registrate"
+        }
+    }
+    maven {
+        url = "https://maven.createmod.net"
+        content {
+            includeGroup "com.simibubi.create"
+            includeGroup "net.createmod.ponder"
+            includeGroup "dev.engine-room.flywheel"
+        }
+    }
+    maven {
+        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    } // ForgeConfigAPIPort
+    maven {
+        url = "https://maven.jaackson.me"
+        content {
+            includeGroup "com.teamabnormals"
+        }
+    }
+    maven {
+        url = "https://maven.architectury.dev/"
+        content {
+            includeGroup "dev.architectury"
+        }
+    }
+    maven {
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                url "https://cursemaven.com"
+            }
+        }
+        filter {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+
+    implementation("com.simibubi.create:create-${mc_version}:${create_version}:slim") { transitive = false }
+    implementation("net.createmod.ponder:Ponder-NeoForge-${mc_version}:${ponder_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${mc_version}:${flywheel_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${mc_version}:${flywheel_version}")
+    implementation("com.tterrag.registrate:Registrate:${registrate_version}")
+
+    implementation "curse.maven:farmers-delight-398521:${farmers_delight_version}"
+    //modImplementation("curse.maven:overweight-farming-591666:${overweight_farming_version}")
+
+    compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
+
+    implementation 'curse.maven:kotlinforforge-351264:5978393'
+}

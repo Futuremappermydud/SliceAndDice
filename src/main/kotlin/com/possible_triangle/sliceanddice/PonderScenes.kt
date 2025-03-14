@@ -29,8 +29,8 @@ import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.FarmBlock
 import net.minecraft.world.level.material.Fluids
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 object PonderScenes : PonderPlugin {
 
@@ -278,7 +278,7 @@ object PonderScenes : PonderPlugin {
                     it.isInvisible = true
                 }
 
-                val color = MobEffects.INVISIBILITY.color
+                val color = MobEffects.INVISIBILITY.value().color
                 val r: Double = (color shr 16 and 255).toDouble() / 255.0
                 val g: Double = (color shr 8 and 255).toDouble() / 255.0
                 val b: Double = (color shr 0 and 255).toDouble() / 255.0

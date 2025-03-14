@@ -22,6 +22,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.resources.language.I18n
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.HolderLookup
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.NbtOps
@@ -34,13 +35,14 @@ import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.Recipe
+import net.minecraft.world.item.crafting.RecipeHolder
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.Vec3
-import net.minecraftforge.common.capabilities.Capability
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.items.ItemHandlerHelper
+import net.neoforged.neoforge.common.capabilities.Capability
+import net.neoforged.neoforge.common.util.LazyOptional
+import net.neoforged.neoforge.items.ItemHandlerHelper
 import kotlin.streams.asSequence
 
 
@@ -130,29 +132,29 @@ class SlicerTile(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) :
         }
     }
 
-    override fun <C : Container> matchStaticFilters(recipe: Recipe<C>): Boolean {
-        if (recipe !is CuttingProcessingRecipe) return false
-        return recipe.tool != null //&& recipe.tool.items.any { it.`is`(Content.ALLOWED_TOOLS) }
+    override fun matchStaticFilters(recipe: RecipeHolder<out Recipe<*>>?): Boolean {
+        if (recipe?.value !is CuttingProcessingRecipe) return false
+        return (recipe.value as CuttingProcessingRecipe).tool != null //&& recipe.tool.items.any { it.`is`(Content.ALLOWED_TOOLS) }
     }
 
-    override fun read(compound: CompoundTag, clientPacket: Boolean) {
-        super.read(compound, clientPacket)
-        _heldItem = compound.get("HeldItem").let {
+    override fun read(compound: CompoundTag?, registries: HolderLookup.Provider?, clientPacket: Boolean) {
+        super.read(compound, registries, clientPacket)
+        _heldItem = compound?.get("HeldItem").let {
             val decoded = ItemStack.CODEC.parse(NbtOps.INSTANCE, it).result()
             decoded.orElse(ItemStack.EMPTY)
         }
 
-        if (clientPacket && behaviour.mode != Mode.BASIN && compound.contains("ParticleItems", 9)) {
-            val particles = compound.getList("ParticleItems", 10)
-            if (particles.isNotEmpty()) cuttingParticles()
+        if (clientPacket && behaviour.mode != Mode.BASIN && compound?.contains("ParticleItems", 9) == true) {
+            val particles = compound?.getList("ParticleItems", 10)
+            if (particles?.isNotEmpty() == true) cuttingParticles()
         }
     }
 
-    override fun write(compound: CompoundTag, clientPacket: Boolean) {
-        super.write(compound, clientPacket)
+    override fun write(compound: CompoundTag?, registries: HolderLookup.Provider?, clientPacket: Boolean) {
+        super.write(compound, registries, clientPacket)
         if (!_heldItem.isEmpty) {
             val encoded = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, _heldItem).result()
-            encoded.ifPresent { compound.put("HeldItem", it) }
+            encoded.ifPresent { compound?.put("HeldItem", it) }
         }
     }
 
@@ -189,14 +191,14 @@ class SlicerTile(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) :
             CuttingProcessingRecipe.getType(),
             CuttingProcessingRecipe::class.java
         ).asSequence().filter {
-            it.tool?.test(_heldItem) == true
+            it.value.tool?.test(_heldItem) == true
         }.firstOrNull()
 
-        if (assemblyRecipe != null) return assemblyRecipe
+        if (assemblyRecipe != null) return assemblyRecipe.value
 
         val recipes = RecipeFinder.get(inWorldCacheKey, level) {
-            if (it !is CuttingProcessingRecipe) false
-            else it.ingredients.size == 1 && it.fluidIngredients.isEmpty() && it.tool != null
+            if (it.value !is CuttingProcessingRecipe) false
+            else it.value.ingredients.size == 1 && (it.value as CuttingProcessingRecipe).fluidIngredients.isEmpty() && (it.value as CuttingProcessingRecipe).tool != null
         } as List<CuttingProcessingRecipe>
         return recipes.firstOrNull { it.ingredients[0].test(stack) && it.tool!!.test(_heldItem) }
     }
@@ -239,7 +241,7 @@ class SlicerTile(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) :
 
         addToParticleItems(input.stack)
 
-        val toProcess = if (canProcessInBulk()) input.stack else ItemHandlerHelper.copyStackWithSize(input.stack, 1)
+        val toProcess = if (canProcessInBulk()) input.stack else input.stack.copyWithCount(input.stack.maxStackSize)
         val outputs = RecipeApplier.applyRecipeOn(level, toProcess, recipe)
         outputList?.addAll(outputs)
         return true

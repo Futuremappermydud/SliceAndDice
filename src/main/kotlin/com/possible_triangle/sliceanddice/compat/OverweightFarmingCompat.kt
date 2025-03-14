@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.item.crafting.Recipe
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.neoforge.registries.NeoForgeRegistries
 import java.util.function.BiConsumer
 import java.util.function.Supplier
 
@@ -37,7 +37,7 @@ class OverweightFarmingCompat private constructor() : IRecipeInjector {
         val recipes = MiscEvents.PEELABLES.get().map { (from, to) ->
             val fromId = ForgeRegistries.BLOCKS.getKey(from)!!
             val toId = ForgeRegistries.BLOCKS.getKey(to)!!
-            val id = ResourceLocation(
+            val id = ResourceLocation.fromNamespaceAndPath(
                 SliceAndDice.MOD_ID,
                 "$OVERWEIGHT_FARMING/peeling/from_${fromId.path}_to_${toId.path}"
             )
@@ -60,7 +60,7 @@ class OverweightFarmingCompat private constructor() : IRecipeInjector {
         MiscEvents.WAXABLES.get().forEach { (from, to) ->
             val fromId = ForgeRegistries.BLOCKS.getKey(from)!!
             val toId = ForgeRegistries.BLOCKS.getKey(to)!!
-            val id = ResourceLocation(
+            val id = ResourceLocation.fromNamespaceAndPath(
                 SliceAndDice.MOD_ID,
                 "$OVERWEIGHT_FARMING/waxing/from_${fromId.path}_to_${toId.path}"
             )
