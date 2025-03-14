@@ -20,7 +20,7 @@ class JEICompat : IModPlugin {
 
     private val cutting = CuttingProcessingCategory()
 
-    override fun getPluginUid() = ResourceLocation(SliceAndDice.MOD_ID, "jei")
+    override fun getPluginUid() = ResourceLocation.fromNamespaceAndPath(SliceAndDice.MOD_ID, "jei")
 
     override fun registerCategories(registration: IRecipeCategoryRegistration) {
         registration.addRecipeCategories(cutting)

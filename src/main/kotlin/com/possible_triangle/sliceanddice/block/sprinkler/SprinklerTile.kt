@@ -9,16 +9,17 @@ import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTank
 import net.createmod.catnip.math.VecHelper
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.common.capabilities.Capability
-import net.minecraftforge.common.capabilities.ForgeCapabilities
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.capability.IFluidHandler
+import net.neoforged.neoforge.common.capabilities.Capability
+import net.neoforged.neoforge.common.capabilities.ForgeCapabilities
+import net.neoforged.neoforge.common.util.LazyOptional
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.capability.IFluidHandler
 
 class SprinklerTile(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : SmartBlockEntity(type, pos, state),
     IHaveGoggleInformation {
@@ -75,19 +76,19 @@ class SprinklerTile(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) 
         world.addParticle(particle, vec.x, vec.y, vec.z, x * 0.2, -0.1, z * 0.2)
     }
 
-    override fun writeSafe(tag: CompoundTag) {
-        super.writeSafe(tag)
-        tag.putInt("ProcessingTicks", processingTicks)
+    override fun writeSafe(tag: CompoundTag?, registries: HolderLookup.Provider?) {
+        super.writeSafe(tag, registries)
+        tag?.putInt("ProcessingTicks", processingTicks)
     }
 
-    override fun read(tag: CompoundTag, clientPacket: Boolean) {
-        super.read(tag, clientPacket)
-        processingTicks = tag.getInt("ProcessingTicks")
+    override fun read(tag: CompoundTag?, registries: HolderLookup.Provider?, clientPacket: Boolean) {
+        super.read(tag, registries, clientPacket)
+        processingTicks = tag?.getInt("ProcessingTicks")!!
     }
 
-    override fun write(compound: CompoundTag, client: Boolean) {
-        super.write(compound, client)
-        compound.putInt("ProcessingTicks", processingTicks)
+    override fun write(compound: CompoundTag?, registries: HolderLookup.Provider?, client: Boolean) {
+        super.write(compound, registries, client)
+        compound?.putInt("ProcessingTicks", processingTicks)
     }
 
     override fun addToGoggleTooltip(tooltip: MutableList<Component>, sneaking: Boolean): Boolean {

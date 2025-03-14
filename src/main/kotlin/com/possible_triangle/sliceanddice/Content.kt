@@ -42,6 +42,7 @@ import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.neoforged.api.distmarker.Dist
+import net.neoforged.bus.api.IEventBus
 import net.neoforged.data.event.GatherDataEvent
 import net.neoforged.eventbus.api.IEventBus
 import net.neoforged.neoforge.fluids.BaseFlowingFluid
@@ -51,14 +52,12 @@ import net.neoforged.fml.config.ModConfig
 import net.neoforged.neoforge.registries.DeferredRegister
 import net.neoforged.neoforge.registries.NeoForgeRegistries
 import net.neoforged.neoforge.registries.RegistryObject
-import thedarkcolour.kotlinforforge.forge.LOADING_CONTEXT
-import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import java.util.function.Supplier
 
 object Content {
 
     fun modLoc(path: String): ResourceLocation {
-        return ResourceLocation(MOD_ID, path)
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
     }
 
     private val REGISTRATE = CreateRegistrate.create(MOD_ID)
@@ -184,7 +183,7 @@ object Content {
         SprinkleBehaviour.register(WET_FLUIDS, MoistBehaviour)
         SprinkleBehaviour.register(HOT_FLUIDS, BurningBehaviour)
         SprinkleBehaviour.register(FERTILIZERS, FertilizerBehaviour)
-        SprinkleBehaviour.register({ AllFluids.POTION.`is`(it.fluid) }, PotionBehaviour)
+        SprinkleBehaviour.register({ AllFluids.POTION.value().`is`(it.fluid) }, PotionBehaviour)
     }
 
 }

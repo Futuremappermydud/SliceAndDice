@@ -6,7 +6,7 @@ import net.minecraft.util.RandomSource
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.alchemy.PotionUtils
-import net.minecraftforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.FluidStack
 import kotlin.math.max
 
 object PotionBehaviour : SprinkleBehaviour {
